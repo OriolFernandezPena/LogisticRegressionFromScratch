@@ -1,4 +1,5 @@
 import numpy as np
+from src.exceptions import NotFittedError
 
 class LogisticRegression():
     def _init__(self):
@@ -10,6 +11,8 @@ class LogisticRegression():
         return 1 / (1 + np.exp(-x))
     
     def predict_proba(self, X):
+        if self.theta is None:
+            raise NotFittedError("This class hasn't been fitted yet")
         
         return self._log_function(np.dot(X, self.theta) + self.b)
 
@@ -22,7 +25,7 @@ class LogisticRegression():
         return np.matmul(X.T, _dif_ys) / m, _dif_ys / m
         
     
-    def fit(self, X: np.array, y: np.array, epochs: int = 100, eta: float = 0.001, save_losses: bool = False):
+    def fit(self, X: np.array, y: np.array, epochs: int = 100, eta: float = 0.01, save_losses: bool = False):
         # Comprobar tamaños compatibles
         # Comprobar datos son numéricos
         # Comprobar que y solo tiene dos etiquetas 0 y 1
@@ -41,5 +44,8 @@ class LogisticRegression():
             d_thetas, d_b = self._d_loss(X, y, _predictions)
             self.theta -= eta * d_thetas
             self.b -= eta * d_b
+
+    def predict(self, X, threshold : float = 0.5):
+        return (self.predict_proba(X) >= threshold).astype(int)
 
 
